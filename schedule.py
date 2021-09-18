@@ -1,104 +1,116 @@
 import pickle
 import datetime
-from tkinter import Toplevel, Frame, Label, Text, Button, Entry, IntVar, W, END
-from tkinter.messagebox import showwarning
+import sys
+from PyQt5 import QtGui
+from PyQt5 import QtCore
+from PyQt5.QtWidgets import QApplication, QGridLayout, QHBoxLayout, QLabel, QMessageBox, QPushButton, QSizePolicy, QSpacerItem, QSpinBox, QTextEdit, QWidget
 
-class Planner:
-    def __init__(self, parent):
-        self.parent = parent
+class Planner(QWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
 
         with open("schedule.dat", "rb") as fin:
             self.schedule = pickle.load(fin)
 
-        root = Toplevel()
-        root.title("Planner")
+        self.setWindowTitle("Planner")
+        self.setWindowIcon(QtGui.QIcon("cms.png"))
 
-        root.protocol("WM_DELETE_WINDOW", self.close);
+        self.setMinimumSize(500, 400)
 
-        self.text = Text(root, width=30, height=20)
-        frame = Frame(root)
-        self.text.grid(row=0, column=0)
-        frame.grid(row=0, column=1)
+        # Layout and widgets
+        layout = QHBoxLayout(self)
+        self.text = QTextEdit(self)
+        self.text.setReadOnly(True)
+        self.editWidget = QWidget(self)
+        layout.addWidget(self.text, 3)
+        layout.addWidget(self.editWidget, 1)
+        self.setLayout(layout)
 
-        self.v1 = IntVar()
-        self.v2 = IntVar()
-        self.v3 = IntVar()
-        self.v4 = IntVar()
-        self.v5 = IntVar()
-        self.v6 = IntVar()
-        self.v7 = IntVar()
-        self.clear_entries()
+        editLayout = QGridLayout(self.editWidget)
+        self.editWidget.setLayout(editLayout)
 
-        entry1 = Entry(frame, width=3, textvariable=self.v1)
-        entry1.bind("<Return>", self.delete)
-        label1 = Label(frame, text="Index: ")
-        label1.grid(row=1, column=0)
-        entry1.grid(row=1, column=1, pady=50)
-        bt1 = Button(frame, text="Delete", command=self.delete)
-        bt1.bind("<Return>", self.delete)
-        bt1.grid(row=1, column=2)
+        labelIndex = QLabel("Delete Index: ", self)
+        editLayout.addWidget(labelIndex, 0, 0, 1, 3)
 
-        entry2 = Entry(frame, width=3, textvariable=self.v2)
-        entry3 = Entry(frame, width=3, textvariable=self.v3)
-        entry4 = Entry(frame, width=3, textvariable=self.v4)
-        entry5 = Entry(frame, width=3, textvariable=self.v5)
-        entry6 = Entry(frame, width=3, textvariable=self.v6)
-        entry7 = Entry(frame, width=3, textvariable=self.v7)
-        entry7.bind("<Return>", self.add)
-        lb_beg = Label(frame, text="Begin:")
-        lb_end = Label(frame, text="End:")
+        self.delBox = QSpinBox(self)
+        self.delBox.setRange(1, len(self.schedule))
+        editLayout.addWidget(self.delBox, 1, 0)
+        delButton = QPushButton("&Delete", self)
+        delButton.clicked.connect(self.delete)
+        editLayout.addWidget(delButton, 1, 1, 1, 2)
 
-        lb_beg.grid(row=2, column=0, columnspan=3, sticky=W)
-        entry2.grid(row=3, column=0)
-        entry3.grid(row=3, column=1)
-        entry4.grid(row=3, column=2)
-        lb_end.grid(row=4, column=0, columnspan=3, sticky=W)
-        entry5.grid(row=5, column=0)
-        entry6.grid(row=5, column=1)
-        entry7.grid(row=5, column=2)
+        editLayout.addItem(QSpacerItem(20, 20, 
+            QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding), 2, 0)
 
-        bt2 = Button(frame, text="Add", command=self.add)
-        bt2.bind("<Return>", self.add)
-        bt2.grid(row=6, column=0, columnspan=3)
+        self.addBoxes = list()
+        for i in range(4, 7, 2):
+            for j in range(3):
+                self.addBoxes.append(QSpinBox(self))
+                editLayout.addWidget(self.addBoxes[-1], i, j)
+
+        self.addBoxes[0].setRange(0, 23)
+        self.addBoxes[1].setRange(0, 59)
+        self.addBoxes[2].setRange(0, 59)
+        self.addBoxes[3].setRange(0, 23)
+        self.addBoxes[4].setRange(0, 59)
+        self.addBoxes[5].setRange(0, 59)
+
+        beginLabel = QLabel("Add Begin: ", self)
+        editLayout.addWidget(beginLabel, 3, 0, 1, 3)
+        endLabel = QLabel("Add End: ", self)
+        editLayout.addWidget(endLabel, 5, 0, 1, 3)
+
+        addButton = QPushButton("&Add", self)
+        addButton.clicked.connect(self.add)
+        editLayout.addWidget(addButton, 7, 1, 1, 2)
 
         self.show_schedule()
+        self.resetInputBoxes()
 
-        root.mainloop()
+    def warning(self, str1, str2):
+        self.message = QMessageBox(QMessageBox.Warning, str1, str2)
+        self.message.setWindowIcon(QtGui.QIcon("cms.png"))
+        self.message.setModal(False)
+        self.message.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.WindowCloseButtonHint)
+        self.message.show()
 
     def show_schedule(self):
-        self.text.delete(1.0, END)
+        self.text.clear()
+        cursor = self.text.textCursor()
         for index, task in enumerate(self.schedule, 1):
             task_str = task[0].strftime(
                 "%H:%M:%S") + " - " + task[1].strftime("%H:%M:%S")
-            self.text.insert(END, str(index) + "\t" + task_str + "\n")
+            cursor.insertText("{:3d}  ".format(index) + task_str + "\n")
 
     def update_schedule(self):
         self.schedule.sort()
         with open("schedule.dat", "wb") as fout:
             pickle.dump(self.schedule, fout)
 
-    def delete(self, event=None):
-        if self.v1.get() - 1 >= len(self.schedule) or self.v1.get() - 1 < 0:
-            showwarning("Warning", "Index out of range!")
+        self.delBox.setRange(1, len(self.schedule))
+
+    def delete(self):
+        if self.delBox.value() - 1 >= len(self.schedule) or self.delBox.value() - 1 < 0:
+            self.warning("Warning", "Index out of range!")
             return
-        del self.schedule[self.v1.get() - 1]
+        del self.schedule[int(self.delBox.text()) - 1]
         self.update_schedule()
         self.show_schedule()
-        self.clear_entries()
+        self.resetInputBoxes()
 
-    def add(self, event=None):
-        d1 = datetime.time(self.v2.get(), self.v3.get(), self.v4.get())
-        d2 = datetime.time(self.v5.get(), self.v6.get(), self.v7.get())
+    def add(self):
+        d1 = datetime.time(self.addBoxes[0].value(), self.addBoxes[1].value(), self.addBoxes[2].value())
+        d2 = datetime.time(self.addBoxes[3].value(), self.addBoxes[4].value(), self.addBoxes[5].value())
         if d1 >= d2:
-            showwarning("Warning", "Task time not valid!")
+            self.warning("Warning", "Task time not valid!")
             return
         if not self.valid_input(d1, d2):
-            showwarning("Warning", "Overlapping existing tasks!")
+            self.warning("Warning", "Overlapping existing tasks!")
             return
         self.schedule.append((d1, d2))
         self.update_schedule()
         self.show_schedule()
-        self.clear_entries()
+        self.resetInputBoxes()
 
     def valid_input(self, d1, d2):
         if not self.schedule:
@@ -112,19 +124,20 @@ class Planner:
                     return True
                 index += 1
         return False
-        
-    def clear_entries(self):
-        self.v1.set(1)
-        self.v2.set(0)
-        self.v3.set(0)
-        self.v4.set(0)
-        self.v5.set(0)
-        self.v6.set(0)
-        self.v7.set(0)
 
-    def close(self):
-        self.parent.restart()
+    def resetInputBoxes(self):
+        for box in self.addBoxes:
+            box.setValue(0)
         
+        self.delBox.setValue(0)
+
+    def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
+        self.warning("Warning", "Please reload data \nif the schedule has been edited! ")
+        return super().closeEvent(a0)
+
 
 if __name__ == "__main__":
-    Planner()
+    app = QApplication(sys.argv)
+    d = Planner(None)
+    d.show()
+    sys.exit(app.exec_())

@@ -1,4 +1,0 @@
-version 3.0
-
-Scheduled shutdown: automatically shut down your computer 5 min after all tasks over
-Visual improvements on calendar

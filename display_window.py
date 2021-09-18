@@ -7,7 +7,7 @@ import os
 import pickle
 from PyQt5 import QtGui
 from PyQt5 import QtCore
-from PyQt5.QtWidgets import QApplication, QLabel, QMenu, QMessageBox, QWidget
+from PyQt5.QtWidgets import QApplication, QHBoxLayout, QLabel, QMenu, QMessageBox, QWidget
 import win32gui
 import sys
 
@@ -45,6 +45,8 @@ class DisplayWindow(QWidget):
         self.setWindowTitle("Hello PyQt5")
         self.setWindowIcon(QtGui.QIcon("cms.png"))
 
+        self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
+
         font = QtGui.QFont("Microsoft YaHei")
         font.setPointSize(12)
 
@@ -60,17 +62,17 @@ class DisplayWindow(QWidget):
         self.label2.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.label2.setFont(font)
 
+        # Layout
+        layout = QHBoxLayout(self)
+        layout.addWidget(self.label1)
+        layout.addWidget(self.label2)
+        self.setLayout(layout)
+
         # Window Settings
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
         setWindow(self, WINDOW_WIDTH, RIGHT_INTERVAL)
 
-        # self.label1.setGeometry(0, 0, WINDOW_WIDTH, int(self.height() / 2))
-        # self.label2.setGeometry(0, int(self.height() / 2),
-        #                         WINDOW_WIDTH, int(self.height() / 2))
-        self.label1.setGeometry(0, 0, WINDOW_WIDTH // 2, self.height())
-        self.label2.setGeometry(WINDOW_WIDTH // 2, 0,
-                                WINDOW_WIDTH // 2, self.height())
-
+        # Background
         p = QtGui.QPalette()
         p.setColor(QtGui.QPalette.Background, QtGui.QColor(255, 255, 255, 0))
         self.setPalette(p)
@@ -97,8 +99,6 @@ class DisplayWindow(QWidget):
         self.message.setModal(False)
         self.message.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.WindowCloseButtonHint)
         self.message.show()
-
-        # QMessageBox.warning(self, str1, str2)
 
     def initCalendar(self):
         with open("calendar.dat", "rb") as fin:
@@ -127,19 +127,15 @@ class DisplayWindow(QWidget):
             self.schedule = pickle.load(fin)
 
         self.task_num = 0
-
         self.state = True  # True为任务中
         self.end_time = datetime.time(0, 0, 0)
 
     def initSettings(self):
-        with open("settings.dat", "rb") as fin:
-            self.settings = pickle.load(fin)
-
-        self.shutdown = self.settings.shutdown
-        self.darkmode = self.settings.darkmode
+        self.settings = Settings()
+        self.settings.loadFile("settings.dat")
 
     def initColor(self):
-        self.colorSet = COLORSETS[self.darkmode]
+        self.colorSet = COLORSETS[self.settings.darkmode]
         self.label2.setStyleSheet("color:%s" % self.colorSet[0])
         if self.state:
             self.label1.setStyleSheet("color:%s" % self.colorSet[2])
@@ -158,7 +154,7 @@ class DisplayWindow(QWidget):
             if self.current_alarm >= len(self.alarms):
                 self.current_alarm = -1
 
-        # TODO: what is this for?
+        # TODO: what is this for? check 24:00
         if (now.hour, now.minute) == (0, 0) and now.second < 3:
             self.end_time = datetime.time(0, 0, 0)
 
@@ -196,12 +192,13 @@ class DisplayWindow(QWidget):
                 t = self.warning("Task Ends",
                                  "Today's work is over.\nHave a rest.")
 
-                if self.shutdown:
+                if self.settings.shutdown:
                     os.system("shutdown /s /t 300")
 
-        # print(now.strftime("%H:%M:%S"))
+        print(now.strftime("%H:%M:%S"))
 
     def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
+        self.settings.dumpFile("settings.dat")
         resetWindow(self, RIGHT_INTERVAL)
         return super().closeEvent(a0)
 
@@ -222,7 +219,7 @@ class DisplayWindow(QWidget):
             self.contextMenu.addSeparator()
             self.actionF = self.contextMenu.addAction("Load Data")
             self.actionG = self.contextMenu.addAction(
-                "Bright Mode" if self.darkmode else "Dark Mode")
+                "Bright Mode" if self.settings.darkmode else "Dark Mode")
             self.actionH = self.contextMenu.addAction("Exit")
             self.contextMenu.popup(QtGui.QCursor.pos())
 
@@ -238,10 +235,12 @@ class DisplayWindow(QWidget):
             print(e)
 
     def edit_schedule(self):
-        Planner(self)
+        self.planner = Planner()
+        self.planner.show()
 
     def view_calendar(self):
-        CalendarEditor(self)
+        self.editor = CalendarEditor()
+        self.editor.show()
 
     def full_screen(self):
         if not self.state:
@@ -259,7 +258,7 @@ class DisplayWindow(QWidget):
         self.update()
 
     def change_color(self):
-        self.darkmode = 1 - self.darkmode
+        self.settings.darkmode = 1 - self.settings.darkmode
         self.initColor()
         self.update()
 
