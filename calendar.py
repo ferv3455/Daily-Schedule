@@ -33,6 +33,8 @@ class Calendar:
 
 
 class CalendarEditor(QWidget):
+    closingSignal = QtCore.pyqtSignal()
+
     def __init__(self, parent=None):
         super().__init__(parent)
 
@@ -451,7 +453,7 @@ class CalendarEditor(QWidget):
 
     def warning(self, str1, str2):
         self.message = QMessageBox(QMessageBox.Warning, str1, str2)
-        self.message.setWindowIcon(QtGui.QIcon("cms.png"))
+        self.message.setWindowIcon(QtGui.QIcon("images/cms.png"))
         self.message.setModal(False)
         self.message.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.WindowCloseButtonHint)
         self.message.show()
@@ -480,7 +482,8 @@ class CalendarEditor(QWidget):
         with open("remarks.dat", "w") as fout:
             fout.write(content)
 
-        self.warning("Warning", "Please reload data \nif alarms have been edited! ")
+        # self.warning("Warning", "Please reload data \nif alarms have been edited! ")
+        self.closingSignal.emit()
         return super().closeEvent(a0)
 
 

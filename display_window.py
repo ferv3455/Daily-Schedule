@@ -1,5 +1,5 @@
-from calendar import CalendarEditor, Calendar
 from full_screen import FullScreenDemo
+from calendar import CalendarEditor, Calendar
 from schedule import Planner
 from settings import Settings
 import datetime
@@ -98,7 +98,7 @@ class DisplayWindow(QWidget):
 
     def warning(self, str1, str2):
         self.message = QMessageBox(QMessageBox.Warning, str1, str2)
-        self.message.setWindowIcon(QtGui.QIcon("cms.png"))
+        self.message.setWindowIcon(QtGui.QIcon("images/cms.png"))
         self.message.setModal(False)
         self.message.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.WindowCloseButtonHint)
         self.message.show()
@@ -188,8 +188,8 @@ class DisplayWindow(QWidget):
 
             else:               # tasks over
                 self.end_time = datetime.time(23, 59, 59)
-                # self.v2.set((datetime.datetime.now() +
-                #              datetime.timedelta(minutes=5)).strftime("%H:%M:%S"))
+                self.label2.setText((datetime.datetime.now() +
+                             datetime.timedelta(minutes=5)).strftime("%H:%M"))
                 self.label1.setText("Over")
                 self.label1.setStyleSheet("color:%s" % self.colorSet[1])
                 t = self.warning("Task Ends",
@@ -198,7 +198,7 @@ class DisplayWindow(QWidget):
                 if self.settings.shutdown:
                     os.system("shutdown /s /t 300")
 
-        print(now.strftime("%H:%M:%S"))
+        # print(now.strftime("%H:%M:%S"))
 
     def showMenu(self):
         if (not self.contextMenu):
@@ -239,10 +239,12 @@ class DisplayWindow(QWidget):
 
     def edit_schedule(self):
         self.planner = Planner()
+        self.planner.closingSignal.connect(self.load)
         self.planner.show()
 
     def view_calendar(self):
         self.editor = CalendarEditor()
+        self.editor.closingSignal.connect(self.load)
         self.editor.show()
 
     def full_screen(self):
@@ -256,6 +258,7 @@ class DisplayWindow(QWidget):
     def change_shutdown(self):
         self.settings.shutdown = 1 - self.settings.shutdown
         self.update()
+        self.settings.dumpFile("settings.dat")
 
     def load(self):
         self.initCalendar()
@@ -268,6 +271,7 @@ class DisplayWindow(QWidget):
         self.settings.darkmode = 1 - self.settings.darkmode
         self.initColor()
         self.update()
+        self.settings.dumpFile("settings.dat")
         
     def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
         self.settings.dumpFile("settings.dat")
