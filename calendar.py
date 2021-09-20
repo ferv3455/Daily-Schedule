@@ -7,10 +7,6 @@ from PyQt5 import QtGui
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QApplication, QButtonGroup, QFrame, QGridLayout, QGroupBox, QHBoxLayout, QLabel, QLineEdit, QMessageBox, QPushButton, QRadioButton, QSizePolicy, QSpacerItem, QSpinBox, QTextEdit, QVBoxLayout, QWidget
 
-# from tkinter import Toplevel, Frame, Button, Label, LEFT, RIGHT, IntVar, \
-#         StringVar, Text, Radiobutton, Entry, font, W, X, END
-# from tkinter.messagebox import showwarning
-
 class Calendar:
     def __init__(self):
         self.marked_days = dict()
@@ -168,6 +164,7 @@ class CalendarEditor(QWidget):
         self.addAlarmBoxes = list()
         for i in range(3):
             self.addAlarmBoxes.append(QSpinBox(alarmBox))
+            self.addAlarmBoxes[-1].installEventFilter(self)
             alarmLayout.addWidget(self.addAlarmBoxes[-1], 0, i)
         self.addAlarmBoxes[0].setRange(0, 23)
         self.addAlarmBoxes[1].setRange(0, 59)
@@ -180,6 +177,7 @@ class CalendarEditor(QWidget):
         alarmLayout.addWidget(addAlarmButton, 0, 3)
 
         self.removeAlarmBox = QSpinBox(alarmBox)
+        self.removeAlarmBox.installEventFilter(self)
         alarmLayout.addWidget(self.removeAlarmBox, 1, 1)
 
         icon = QtGui.QIcon("images/negative.png")
@@ -196,6 +194,7 @@ class CalendarEditor(QWidget):
         editLayout.addWidget(remarkBox, 0, 1)
 
         self.newRemarkEdit = QLineEdit(remarkBox)
+        self.newRemarkEdit.returnPressed.connect(self.add_remark)
         remarkLayout.addWidget(self.newRemarkEdit, 0, 0, 1, 5)
 
         icon = QtGui.QIcon("images/plus.png")
@@ -214,6 +213,7 @@ class CalendarEditor(QWidget):
             QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred), 1, 1)
 
         self.removeRemarkBox = QSpinBox(remarkBox)
+        self.removeRemarkBox.installEventFilter(self)
         remarkLayout.addWidget(self.removeRemarkBox, 1, 2)
 
         icon = QtGui.QIcon("images/negative.png")
@@ -320,14 +320,6 @@ class CalendarEditor(QWidget):
             self.warning("Warning", "Index out of range!")
         self.update_column(self.select_buttons.checkedId() + 1, 1)
         self.reset_date_input()
-
-    # def func_decide(self, event):
-    #     if event.keysym == "Return":
-    #         self.del_remark()
-    #     elif event.keycode == 38:
-    #         self.up_remark()
-    #     elif event.keycode == 40:
-    #         self.down_remark()
 
     def add_remark(self, event=None):
         date = self.current_date + self.select_buttons.checkedId() * self.day_delta
@@ -464,6 +456,22 @@ class CalendarEditor(QWidget):
         self.message.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.WindowCloseButtonHint)
         self.message.show()
 
+    def eventFilter(self, obj: QtCore.QObject, event: QtCore.QEvent) -> bool:
+        if obj in self.addAlarmBoxes:
+            if (event.type() == QtCore.QEvent.Type.KeyPress and event.key() == QtCore.Qt.Key.Key_Return):
+                self.add_alarm()
+                return True
+        elif obj == self.removeAlarmBox:
+            if (event.type() == QtCore.QEvent.Type.KeyPress and event.key() == QtCore.Qt.Key.Key_Return):
+                self.del_alarm()
+                return True
+        elif obj == self.removeRemarkBox:
+            if (event.type() == QtCore.QEvent.Type.KeyPress and event.key() == QtCore.Qt.Key.Key_Return):
+                self.del_remark()
+                return True
+
+        return super().eventFilter(obj, event)
+
     def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
         with open("calendar.dat", "wb") as fout:
             pickle.dump(self.calendar, fout)
@@ -472,7 +480,7 @@ class CalendarEditor(QWidget):
         with open("remarks.dat", "w") as fout:
             fout.write(content)
 
-        self.warning("Warning", "Please reload data \nif the calendar has been edited! ")
+        self.warning("Warning", "Please reload data \nif alarms have been edited! ")
         return super().closeEvent(a0)
 
 

@@ -11,6 +11,7 @@ from PyQt5.QtWidgets import QApplication, QHBoxLayout, QLabel, QMenu, QMessageBo
 import win32gui
 import sys
 
+
 RIGHT_INTERVAL = 80
 WINDOW_WIDTH = 80
 WINDOW_WIDTH = 150
