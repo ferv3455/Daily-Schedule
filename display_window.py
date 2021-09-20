@@ -1,4 +1,4 @@
-from calendar import CalendarEditor
+from calendar import CalendarEditor, Calendar
 from full_screen import FullScreenDemo
 from schedule import Planner
 from settings import Settings
@@ -43,7 +43,7 @@ class DisplayWindow(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Hello PyQt5")
-        self.setWindowIcon(QtGui.QIcon("cms.png"))
+        self.setWindowIcon(QtGui.QIcon("images/cms.png"))
 
         self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
 

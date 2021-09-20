@@ -13,7 +13,9 @@ class Planner(QWidget):
             self.schedule = pickle.load(fin)
 
         self.setWindowTitle("Planner")
-        self.setWindowIcon(QtGui.QIcon("cms.png"))
+        self.setWindowIcon(QtGui.QIcon("images/cms.png"))
+
+        self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
 
         self.setMinimumSize(500, 400)
 
