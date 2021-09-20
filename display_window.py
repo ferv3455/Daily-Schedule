@@ -190,7 +190,7 @@ class DisplayWindow(QWidget):
                 self.end_time = datetime.time(23, 59, 59)
                 # self.v2.set((datetime.datetime.now() +
                 #              datetime.timedelta(minutes=5)).strftime("%H:%M:%S"))
-                self.label1.setText("All tasks over")
+                self.label1.setText("Over")
                 self.label1.setStyleSheet("color:%s" % self.colorSet[1])
                 t = self.warning("Task Ends",
                                  "Today's work is over.\nHave a rest.")
