@@ -78,16 +78,18 @@ class DisplayWindow(QWidget):
         p.setColor(QtGui.QPalette.Background, QtGui.QColor(255, 255, 255, 0))
         self.setPalette(p)
 
-        # Right Click Menu
-        self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        self.customContextMenuRequested.connect(self.showMenu)
-
+        # Initialize data
         self.initCalendar()
         self.initAlarms()
         self.initSchedule()
         self.initSettings()
         self.initColor()
         self.update()
+
+        # Right Click Menu
+        self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.customContextMenuRequested.connect(self.showMenu)
+        self.contextMenu = None
 
         # Update Timer
         self.timer = QtCore.QTimer(self)
@@ -198,40 +200,40 @@ class DisplayWindow(QWidget):
 
         print(now.strftime("%H:%M:%S"))
 
-    def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
-        self.settings.dumpFile("settings.dat")
-        resetWindow(self, RIGHT_INTERVAL)
-        return super().closeEvent(a0)
-
-    # def mousePressEvent(self, a0: QtGui.QMouseEvent) -> None:
-    #     self.close()
-    #     return super().mousePressEvent(a0)
-
     def showMenu(self):
-        try:
+        if (not self.contextMenu):
             self.contextMenu = QMenu()
-            self.actionA = self.contextMenu.addAction("Edit the schedule")
-            self.actionB = self.contextMenu.addAction("View the calendar")
-            self.contextMenu.addSeparator()
-            self.actionC = self.contextMenu.addAction("Fullscreen")
-            self.actionD = self.contextMenu.addAction("Scheduled Shutdown")
-            self.contextMenu.addSeparator()
-            self.actionE = self.contextMenu.addAction("Version 4.0")
-            self.contextMenu.addSeparator()
-            self.actionF = self.contextMenu.addAction("Load Data")
-            self.actionG = self.contextMenu.addAction(
-                "Bright Mode" if self.settings.darkmode else "Dark Mode")
-            self.actionH = self.contextMenu.addAction("Exit")
-            self.contextMenu.popup(QtGui.QCursor.pos())
 
-            self.actionA.triggered.connect(self.edit_schedule)
-            self.actionB.triggered.connect(self.view_calendar)
-            self.actionC.triggered.connect(self.full_screen)
-            self.actionF.triggered.connect(self.load)
-            self.actionG.triggered.connect(self.change_color)
-            self.actionH.triggered.connect(self.close)
-            self.contextMenu.show()
+        self.contextMenu.clear()
+        menuActions = list()
+        menuActions.append(self.contextMenu.addAction("Edit the schedule"))
+        menuActions.append(self.contextMenu.addAction("View the calendar"))
+        self.contextMenu.addSeparator()
+        menuActions.append(self.contextMenu.addAction("Fullscreen"))
+        menuActions.append(self.contextMenu.addAction(
+            "Shutdown ON" if self.settings.shutdown else "Shutdown OFF"))
+        self.contextMenu.addSeparator()
+        menuActions.append(self.contextMenu.addAction("Version 4.0"))
+        self.contextMenu.addSeparator()
+        menuActions.append(self.contextMenu.addAction("Load Data"))
+        menuActions.append(self.contextMenu.addAction(
+            "Dark Mode" if self.settings.darkmode else "Bright Mode"))
+        menuActions.append(self.contextMenu.addAction("Exit"))
+        self.contextMenu.popup(QtGui.QCursor.pos())
 
+        menuActions[0].triggered.connect(self.edit_schedule)
+        menuActions[1].triggered.connect(self.view_calendar)
+        # menuActions[2].triggered.connect(self.full_screen)
+        menuActions[2].setEnabled(False)
+        menuActions[3].triggered.connect(self.change_shutdown)
+        menuActions[4].setEnabled(False)
+        menuActions[5].triggered.connect(self.load)
+        menuActions[6].triggered.connect(self.change_color)
+        menuActions[7].triggered.connect(self.close)
+
+        try:
+            # self.contextMenu.show()
+            self.contextMenu.exec(QtGui.QCursor.pos())
         except Exception as e:
             print(e)
 
@@ -251,6 +253,10 @@ class DisplayWindow(QWidget):
                 return
         FullScreenDemo(self, self.end_time)
 
+    def change_shutdown(self):
+        self.settings.shutdown = 1 - self.settings.shutdown
+        self.update()
+
     def load(self):
         self.initCalendar()
         self.initAlarms()
@@ -262,6 +268,11 @@ class DisplayWindow(QWidget):
         self.settings.darkmode = 1 - self.settings.darkmode
         self.initColor()
         self.update()
+        
+    def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
+        self.settings.dumpFile("settings.dat")
+        resetWindow(self, RIGHT_INTERVAL)
+        return super().closeEvent(a0)
 
 
 if __name__ == "__main__":
