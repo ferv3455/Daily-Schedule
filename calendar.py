@@ -47,7 +47,6 @@ class CalendarEditor(QWidget):
         # Initialize window
         self.setWindowTitle("Calendar Editor")
         self.setWindowIcon(QtGui.QIcon("images/cms.png"))
-        self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
         self.setWindowState(QtCore.Qt.WindowState.WindowMaximized)
 
         # Load data
