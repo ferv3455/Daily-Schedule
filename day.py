@@ -1,5 +1,6 @@
 import datetime
 
+
 class Day:
     def __init__(self, dateobj, reserve=False):
         self.date = dateobj
@@ -47,5 +48,3 @@ class Day:
 
     def getSaveCondition(self):
         return self.save_condition
-
-

@@ -6,6 +6,7 @@ import ctypes
 ctypes.windll.shcore.SetProcessDpiAwareness(1)
 ScaleFactor = ctypes.windll.shcore.GetScaleFactorForDevice(0)
 
+
 class FullScreenDemo:
     def __init__(self, parent, endtime):
         self.parent = parent

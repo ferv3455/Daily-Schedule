@@ -5,6 +5,7 @@ from PyQt5 import QtGui
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QApplication, QGridLayout, QHBoxLayout, QLabel, QMessageBox, QPushButton, QSizePolicy, QSpacerItem, QSpinBox, QTextEdit, QWidget
 
+
 class Planner(QWidget):
     closingSignal = QtCore.pyqtSignal()
 
@@ -43,8 +44,8 @@ class Planner(QWidget):
         delButton.clicked.connect(self.delete)
         editLayout.addWidget(delButton, 1, 1, 1, 2)
 
-        editLayout.addItem(QSpacerItem(20, 20, 
-            QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding), 2, 0)
+        editLayout.addItem(QSpacerItem(20, 20,
+                                       QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding), 2, 0)
 
         self.addBoxes = list()
         for i in range(4, 7, 2):
@@ -75,7 +76,8 @@ class Planner(QWidget):
         self.message = QMessageBox(QMessageBox.Warning, str1, str2)
         self.message.setWindowIcon(QtGui.QIcon("images/cms.png"))
         self.message.setModal(False)
-        self.message.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.WindowCloseButtonHint)
+        self.message.setWindowFlags(
+            QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.WindowCloseButtonHint)
         self.message.show()
 
     def show_schedule(self):
@@ -103,8 +105,10 @@ class Planner(QWidget):
         self.resetInputBoxes()
 
     def add(self):
-        d1 = datetime.time(self.addBoxes[0].value(), self.addBoxes[1].value(), self.addBoxes[2].value())
-        d2 = datetime.time(self.addBoxes[3].value(), self.addBoxes[4].value(), self.addBoxes[5].value())
+        d1 = datetime.time(self.addBoxes[0].value(
+        ), self.addBoxes[1].value(), self.addBoxes[2].value())
+        d2 = datetime.time(self.addBoxes[3].value(
+        ), self.addBoxes[4].value(), self.addBoxes[5].value())
         if d1 >= d2:
             self.warning("Warning", "Task time not valid!")
             return
@@ -132,7 +136,7 @@ class Planner(QWidget):
     def resetInputBoxes(self):
         for box in self.addBoxes:
             box.setValue(0)
-        
+
         self.delBox.setValue(0)
 
     def closeEvent(self, a0: QtGui.QCloseEvent) -> None:

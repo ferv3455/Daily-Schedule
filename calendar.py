@@ -7,6 +7,7 @@ from PyQt5 import QtGui
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QApplication, QButtonGroup, QFrame, QGridLayout, QGroupBox, QHBoxLayout, QLabel, QLineEdit, QMessageBox, QPushButton, QRadioButton, QSizePolicy, QSpacerItem, QSpinBox, QTextEdit, QVBoxLayout, QWidget
 
+
 class Calendar:
     def __init__(self):
         self.marked_days = dict()
@@ -38,7 +39,8 @@ class CalendarEditor(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        mainFont = QtGui.QFont("Microsoft YaHei", 10, QtGui.QFont.Weight.Normal)
+        mainFont = QtGui.QFont("Microsoft YaHei", 10,
+                               QtGui.QFont.Weight.Normal)
         titleFont = QtGui.QFont("Consolas", 18, QtGui.QFont.Weight.Bold)
         subtitleFont = QtGui.QFont("Calibri", 14, QtGui.QFont.Weight.Bold)
 
@@ -59,7 +61,7 @@ class CalendarEditor(QWidget):
         mainLayout = QVBoxLayout(self)
         self.setLayout(mainLayout)
 
-        ## Title
+        # Title
         titleFrame = QFrame(self)
         mainLayout.addWidget(titleFrame)
         titleLayout = QHBoxLayout(titleFrame)
@@ -78,18 +80,17 @@ class CalendarEditor(QWidget):
         lb_title.setFont(titleFont)
 
         titleLayout.addWidget(bt_previous)
-        titleLayout.addItem(QSpacerItem(20, 20, 
-            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred))
+        titleLayout.addItem(QSpacerItem(20, 20,
+                                        QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred))
         titleLayout.addWidget(lb_title)
-        titleLayout.addItem(QSpacerItem(20, 20, 
-            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred))
+        titleLayout.addItem(QSpacerItem(20, 20,
+                                        QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred))
         titleLayout.addWidget(bt_forward)
 
         bt_previous.clicked.connect(self.backward)
         bt_forward.clicked.connect(self.forward)
 
-
-        ## Calendar Area
+        # Calendar Area
         calendarFrame = QFrame(self)
         mainLayout.addWidget(calendarFrame)
         calendarLayout = QGridLayout(calendarFrame)
@@ -121,7 +122,8 @@ class CalendarEditor(QWidget):
             label.setFont(mainFont)
             self.day_labels.append(label)
             calendarLayout.addWidget(label, 0, i)
-            calendarLayout.setAlignment(label, QtCore.Qt.AlignmentFlag.AlignCenter)
+            calendarLayout.setAlignment(
+                label, QtCore.Qt.AlignmentFlag.AlignCenter)
 
             # Alarm text edit
             alarmEdit = QTextEdit(calendarFrame)
@@ -140,24 +142,25 @@ class CalendarEditor(QWidget):
             # Select button
             button = QRadioButton(calendarFrame)
             button.setFocusPolicy(QtCore.Qt.FocusPolicy.NoFocus)
-            self.select_buttons.addButton(button, i - 1)
+            self.select_buttons.addButton(button, i)
             calendarLayout.addWidget(button, 3, i)
-            calendarLayout.setAlignment(button, QtCore.Qt.AlignmentFlag.AlignCenter)
+            calendarLayout.setAlignment(
+                button, QtCore.Qt.AlignmentFlag.AlignCenter)
 
         calendarLayout.setRowStretch(1, 1)
         calendarLayout.setRowStretch(2, 2)
 
         self.select_buttons.idClicked.connect(self.reset_date_input)
-        self.select_buttons.button(0).setChecked(True)
+        self.select_buttons.button(1).setChecked(True)
 
-        ## Editting area
+        # Editting area
         editFrame = QFrame(self)
         editFrame.setFont(mainFont)
         mainLayout.addWidget(editFrame)
         editLayout = QGridLayout(editFrame)
         editFrame.setLayout(editLayout)
 
-        ### Edit alarms
+        # Edit alarms
         alarmBox = QGroupBox("Edit Alarms", editFrame)
         alarmLayout = QGridLayout(alarmBox)
         alarmBox.setLayout(alarmLayout)
@@ -188,7 +191,7 @@ class CalendarEditor(QWidget):
         removeAlarmButton.clicked.connect(self.del_alarm)
         alarmLayout.addWidget(removeAlarmButton, 1, 3)
 
-        ### Edit remarks
+        # Edit remarks
         remarkBox = QGroupBox("Edit Remarks", editFrame)
         remarkBox.setFixedWidth(400)
         remarkLayout = QGridLayout(remarkBox)
@@ -211,8 +214,8 @@ class CalendarEditor(QWidget):
         moveDownButton.clicked.connect(self.down_remark)
         remarkLayout.addWidget(moveDownButton, 1, 0)
 
-        remarkLayout.addItem(QSpacerItem(20, 20, 
-            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred), 1, 1)
+        remarkLayout.addItem(QSpacerItem(20, 20,
+                                         QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred), 1, 1)
 
         self.removeRemarkBox = QSpinBox(remarkBox)
         self.removeRemarkBox.installEventFilter(self)
@@ -224,8 +227,8 @@ class CalendarEditor(QWidget):
         removeRemarkButton.clicked.connect(self.del_remark)
         remarkLayout.addWidget(removeRemarkButton, 1, 3)
 
-        remarkLayout.addItem(QSpacerItem(20, 20, 
-            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred), 1, 4)
+        remarkLayout.addItem(QSpacerItem(20, 20,
+                                         QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred), 1, 4)
 
         icon = QtGui.QIcon("images/up.png")
         addRemarkButton = QPushButton(icon, "&Up", remarkBox)
@@ -233,21 +236,21 @@ class CalendarEditor(QWidget):
         addRemarkButton.clicked.connect(self.up_remark)
         remarkLayout.addWidget(addRemarkButton, 1, 5)
 
-        ### Clear records
+        # Clear records
         clearBox = QGroupBox("Clear Records", editFrame)
         clearLayout = QGridLayout(clearBox)
         clearBox.setLayout(clearLayout)
         editLayout.addWidget(clearBox, 1, 0, 1, 2)
 
-        clearLayout.addItem(QSpacerItem(20, 20, 
-            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred), 0, 0)
+        clearLayout.addItem(QSpacerItem(20, 20,
+                                        QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred), 0, 0)
 
         self.clearRecordBoxes = list()
         for i in range(2):
             for j in range(3):
                 self.clearRecordBoxes.append(QSpinBox(clearBox))
                 clearLayout.addWidget(self.clearRecordBoxes[-1], i, 2 * j + 1)
-        
+
         self.clearRecordBoxes[0].setRange(0, 3000)
         self.clearRecordBoxes[1].setRange(1, 12)
         self.clearRecordBoxes[2].setRange(1, 31)
@@ -260,15 +263,16 @@ class CalendarEditor(QWidget):
                 clearLayout.addWidget(QLabel("/", clearBox), i, 2 * j + 2)
 
         icon = QtGui.QIcon("images/delete.png")
-        clearButton = QPushButton(icon, "Keep these days\n&Clear the rest", alarmBox)
+        clearButton = QPushButton(
+            icon, "Keep these days\n&Clear the rest", alarmBox)
         clearButton.setFocusPolicy(QtCore.Qt.FocusPolicy.NoFocus)
         clearButton.clicked.connect(self.clear_days)
         clearLayout.addWidget(clearButton, 0, 7, 2, 1)
 
-        clearLayout.addItem(QSpacerItem(20, 20, 
-            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred), 0, 8)
+        clearLayout.addItem(QSpacerItem(20, 20,
+                                        QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred), 0, 8)
 
-        ### Edit memo
+        # Edit memo
         memoBox = QGroupBox("Edit Memo", editFrame)
         memoLayout = QGridLayout(memoBox)
         memoBox.setLayout(memoLayout)
@@ -297,88 +301,95 @@ class CalendarEditor(QWidget):
         self.update_screen()
 
     def add_alarm(self, event=None):
-        date = self.current_date + self.select_buttons.checkedId() * self.day_delta
+        date = self.current_date + \
+            (self.select_buttons.checkedId() - 1) * self.day_delta
         date_obj = self.calendar.get_day(date)
         if not date_obj:
             self.calendar.add_day(date)
             date_obj = self.calendar.get_day(date)
 
-        date_obj.add_alarm(self.addAlarmBoxes[0].value(), 
-                           self.addAlarmBoxes[1].value(), 
+        date_obj.add_alarm(self.addAlarmBoxes[0].value(),
+                           self.addAlarmBoxes[1].value(),
                            self.addAlarmBoxes[2].value())
         date_obj.sort_alarm()
-        self.update_column(self.select_buttons.checkedId() + 1, 1)
-        
+        self.update_column(self.select_buttons.checkedId(), 1)
+
         for i in range(3):
             self.addAlarmBoxes[i].setValue(0)
         self.reset_date_input()
 
     def del_alarm(self, event=None):
-        date = self.current_date + self.select_buttons.checkedId() * self.day_delta
+        date = self.current_date + \
+            (self.select_buttons.checkedId() - 1) * self.day_delta
         date_obj = self.calendar.get_day(date)
         try:
             date_obj.remove_alarm(self.removeAlarmBox.value())
         except:
             self.warning("Warning", "Index out of range!")
-        self.update_column(self.select_buttons.checkedId() + 1, 1)
+        self.update_column(self.select_buttons.checkedId(), 1)
         self.reset_date_input()
 
     def add_remark(self, event=None):
-        date = self.current_date + self.select_buttons.checkedId() * self.day_delta
+        date = self.current_date + \
+            (self.select_buttons.checkedId() - 1) * self.day_delta
         date_obj = self.calendar.get_day(date)
         if not date_obj:
             self.calendar.add_day(date)
             date_obj = self.calendar.get_day(date)
 
         date_obj.add_remark(self.newRemarkEdit.text())
-        self.update_column(self.select_buttons.checkedId() + 1, 2)
+        self.update_column(self.select_buttons.checkedId(), 2)
         self.newRemarkEdit.setText("")
         self.reset_date_input()
 
     def del_remark(self, event=None):
-        date = self.current_date + self.select_buttons.checkedId() * self.day_delta
+        date = self.current_date + \
+            (self.select_buttons.checkedId() - 1) * self.day_delta
         date_obj = self.calendar.get_day(date)
         try:
             date_obj.remove_remark(self.removeRemarkBox.value())
         except:
             self.warning("Warning", "Index out of range!")
-        self.update_column(self.select_buttons.checkedId() + 1, 2)
+        self.update_column(self.select_buttons.checkedId(), 2)
         self.reset_date_input()
 
     def up_remark(self, event=None):
-        date = self.current_date + self.select_buttons.checkedId() * self.day_delta
+        date = self.current_date + \
+            (self.select_buttons.checkedId() - 1) * self.day_delta
         date_obj = self.calendar.get_day(date)
         try:
-            date_obj.switch_remark(self.removeRemarkBox.value(), self.removeRemarkBox.value() - 1)
-            self.update_column(self.select_buttons.checkedId() + 1, 2)
+            date_obj.switch_remark(
+                self.removeRemarkBox.value(), self.removeRemarkBox.value() - 1)
+            self.update_column(self.select_buttons.checkedId(), 2)
             self.removeRemarkBox.setValue(self.removeRemarkBox.value() - 1)
         except:
             self.warning("Warning", "Index out of range!")
-        
 
     def down_remark(self, event=None):
-        date = self.current_date + self.select_buttons.checkedId() * self.day_delta
+        date = self.current_date + \
+            (self.select_buttons.checkedId() - 1) * self.day_delta
         date_obj = self.calendar.get_day(date)
         try:
-            date_obj.switch_remark(self.removeRemarkBox.value(), self.removeRemarkBox.value() + 1)
-            self.update_column(self.select_buttons.checkedId() + 1, 2)
+            date_obj.switch_remark(
+                self.removeRemarkBox.value(), self.removeRemarkBox.value() + 1)
+            self.update_column(self.select_buttons.checkedId(), 2)
             self.removeRemarkBox.setValue(self.removeRemarkBox.value() + 1)
         except:
             self.warning("Warning", "Index out of range!")
-        
+
     def clear_days(self, event=None):
         self.clearRecordBoxes[0].value()
         begin_date = 1000 * self.clearRecordBoxes[0].value() + \
-                100 * self.clearRecordBoxes[1].value() + \
-                self.clearRecordBoxes[2].value()
+            100 * self.clearRecordBoxes[1].value() + \
+            self.clearRecordBoxes[2].value()
         end_date = 1000 * self.clearRecordBoxes[3].value() + \
-                100 * self.clearRecordBoxes[4].value() + \
-                self.clearRecordBoxes[5].value()
+            100 * self.clearRecordBoxes[4].value() + \
+            self.clearRecordBoxes[5].value()
         del_list = list()
         for day in self.calendar:
             if day < begin_date or day > end_date:
                 del_list.append(day)
-                
+
         for day in del_list:
             self.calendar.del_day(day)
         self.update_screen()
@@ -396,22 +407,25 @@ class CalendarEditor(QWidget):
             if date.weekday() > 4:
                 self.day_labels[i].setStyleSheet("background-color: orchid;")
                 self.day_alarms[i].setStyleSheet("background-color: lavender;")
-                self.day_remarks[i].setStyleSheet("background-color: lavender;")
+                self.day_remarks[i].setStyleSheet(
+                    "background-color: lavender;")
             if date == datetime.date.today():
                 self.day_alarms[i].setStyleSheet("background-color: beige;")
                 self.day_remarks[i].setStyleSheet("background-color: beige;")
-            
+
             self.day_labels[i].setText(date.strftime("%m/%d(%a)"))
             date_obj = self.calendar.get_day(date)
             if date_obj:
                 cursor_alarms = self.day_alarms[i].textCursor()
                 for index, alarm in enumerate(date_obj.alarms, 1):
                     alarm_time = alarm.isoformat()
-                    cursor_alarms.insertText("{:2d}  ".format(index) + alarm_time + "\n")
+                    cursor_alarms.insertText(
+                        "{:2d}  ".format(index) + alarm_time + "\n")
 
                 cursor_remarks = self.day_remarks[i].textCursor()
                 for index, remark in enumerate(date_obj.remarks, 1):
-                    cursor_remarks.insertText("{:2d}  ".format(index) + remark + "\n")
+                    cursor_remarks.insertText(
+                        "{:2d}  ".format(index) + remark + "\n")
 
         self.reset_date_input()
 
@@ -425,12 +439,17 @@ class CalendarEditor(QWidget):
         self.clearRecordBoxes[5].setValue(31)
 
     def reset_date_input(self):
-        date = self.current_date + self.select_buttons.checkedId() * self.day_delta
+        date = self.current_date + \
+            (self.select_buttons.checkedId() - 1) * self.day_delta
+        print(self.select_buttons.checkedId() - 1, date)
         date_obj = self.calendar.get_day(date)
         if date_obj:
             self.removeAlarmBox.setRange(1, len(date_obj.alarms))
             self.removeRemarkBox.setRange(1, len(date_obj.remarks))
-    
+        else:
+            self.removeAlarmBox.setRange(1, 1)
+            self.removeRemarkBox.setRange(1, 1)
+
     def update_column(self, idx, row):
         if row == 1:
             self.day_alarms[idx].clear()
@@ -440,7 +459,8 @@ class CalendarEditor(QWidget):
                 cursor = self.day_alarms[idx].textCursor()
                 for index, alarm in enumerate(date_obj.alarms, 1):
                     alarm_time = alarm.isoformat()
-                    cursor.insertText("{:2d}  ".format(index) + alarm_time + "\n")
+                    cursor.insertText("{:2d}  ".format(
+                        index) + alarm_time + "\n")
 
         else:
             self.day_remarks[idx].clear()
@@ -455,7 +475,8 @@ class CalendarEditor(QWidget):
         self.message = QMessageBox(QMessageBox.Warning, str1, str2)
         self.message.setWindowIcon(QtGui.QIcon("images/cms.png"))
         self.message.setModal(False)
-        self.message.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.WindowCloseButtonHint)
+        self.message.setWindowFlags(
+            QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.WindowCloseButtonHint)
         self.message.show()
 
     def eventFilter(self, obj: QtCore.QObject, event: QtCore.QEvent) -> bool:
@@ -477,7 +498,7 @@ class CalendarEditor(QWidget):
     def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
         with open("calendar.dat", "wb") as fout:
             pickle.dump(self.calendar, fout)
-            
+
         content = self.memoEdit.toPlainText().strip()
         with open("remarks.dat", "w") as fout:
             fout.write(content)
@@ -502,4 +523,3 @@ if __name__ == "__main__":
     d = CalendarEditor(None)
     d.show()
     sys.exit(app.exec_())
-

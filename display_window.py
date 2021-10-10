@@ -100,7 +100,8 @@ class DisplayWindow(QWidget):
         self.message = QMessageBox(QMessageBox.Warning, str1, str2)
         self.message.setWindowIcon(QtGui.QIcon("images/cms.png"))
         self.message.setModal(False)
-        self.message.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.WindowCloseButtonHint)
+        self.message.setWindowFlags(
+            QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.WindowCloseButtonHint)
         self.message.show()
 
     def initCalendar(self):
@@ -189,7 +190,7 @@ class DisplayWindow(QWidget):
             else:               # tasks over
                 self.end_time = datetime.time(23, 59, 59)
                 self.label2.setText((datetime.datetime.now() +
-                             datetime.timedelta(minutes=5)).strftime("%H:%M"))
+                                     datetime.timedelta(minutes=5)).strftime("%H:%M"))
                 self.label1.setText("Over")
                 self.label1.setStyleSheet("color:%s" % self.colorSet[1])
                 t = self.warning("Task Ends",
@@ -272,7 +273,7 @@ class DisplayWindow(QWidget):
         self.initColor()
         self.update()
         self.settings.dumpFile("settings.dat")
-        
+
     def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
         self.settings.dumpFile("settings.dat")
         resetWindow(self, RIGHT_INTERVAL)

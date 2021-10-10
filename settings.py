@@ -1,5 +1,6 @@
 import pickle
 
+
 class Settings:
     def __init__(self, shutdown=1, darkmode=1):
         self.shutdown = shutdown
@@ -14,6 +15,7 @@ class Settings:
     def dumpFile(self, filename):
         with open(filename, "wb") as fout:
             pickle.dump(self, fout)
+
 
 if __name__ == "__main__":
     with open("settings.dat", "wb") as fout:
